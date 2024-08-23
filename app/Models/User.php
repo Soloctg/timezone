@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Http;
 
 class User extends Authenticatable
 {
@@ -22,6 +23,17 @@ class User extends Authenticatable
         'password',
         'timezone',
     ];
+
+    //automatic time zone
+    public static function guessUserTimezoneUsingAPI($ip)
+    {
+        $ip = Http::get('https://ipecho.net/'. $ip .'/json');
+        if ($ip->json('timezone')) {
+            return $ip->json('timezone');
+        }
+        return null;
+    }
+
 
     /**
      * The attributes that should be hidden for serialization.

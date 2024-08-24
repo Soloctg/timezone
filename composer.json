@@ -28,8 +28,14 @@
     "autoload-dev": {
         "psr-4": {
             "Tests\\": "tests/"
-        }
+        },
+        //added
+        "files": [
+            "app/Helpers/worksWithDates.php"
+        ]
     },
+
+
     "scripts": {
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
@@ -63,4 +69,6 @@
     },
     "minimum-stability": "stable",
     "prefer-stable": true
+
+
 }

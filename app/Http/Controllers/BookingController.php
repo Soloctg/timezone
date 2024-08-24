@@ -34,7 +34,14 @@ class BookingController extends Controller
      */
     public function store(StoreBookingRequest $request): RedirectResponse
     {
-        $request->user()->bookings()->create($request->validated());
+        //$request->user()->bookings()->create($request->validated());
+        $request->user()->bookings()->create([
+           // 'start' => $request->validated('start'),
+            'start' => fromUserDateTime($request->validated('start')),
+            //'end' => $request->validated('end'),
+            'end' => fromUserDateTime($request->validated('end')),
+        ]);
+
 
         return redirect()->route('booking.index');
     }
@@ -60,7 +67,14 @@ class BookingController extends Controller
      */
     public function update(UpdateBookingRequest $request, Booking $booking): RedirectResponse
     {
-        $booking->update($request->validated());
+        //$booking->update($request->validated());
+
+        $booking->update([
+            //'start' => $request->validated('start'),
+            'start' => fromUserDateTime($request->validated('start')),
+            //'end' => $request->validated('end'),
+            'end' => fromUserDateTime($request->validated('end')),
+        ]);
 
         return redirect()->route('booking.index');
     }

@@ -12,8 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'setTimezone' => \App\Http\Middleware\SetTimezoneMiddleware::class, 
-        ]);
+            'setTimezone' => \App\Http\Middleware\SetTimezoneMiddleware::class,
+            $schedule->command('send:scheduled-notifications')->everyMinute(),
+    ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Models\Booking;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -14,7 +15,7 @@ class BookingReminder1H extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct(protected Booking $booking)
+    public function __construct(Booking $booking)
     {
         //
     }

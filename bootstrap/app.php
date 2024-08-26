@@ -1,5 +1,11 @@
 <?php
 
+use App\Events\BookingCreatedEvent;
+use App\Events\BookingDeletedEvent;
+use App\Events\BookingUpdatedEvent;
+use App\Listeners\BookingCreatedListener;
+use App\Listeners\BookingDeletedListener;
+use App\Listeners\BookingUpdatedListener;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -14,7 +20,20 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'setTimezone' => \App\Http\Middleware\SetTimezoneMiddleware::class,
             $schedule->command('send:scheduled-notifications')->everyMinute(),
-    ]);
+        ]);
+
+        protected $listen = [
+        
+            BookingCreatedEvent::class => [
+                BookingCreatedListener::class,
+            ],
+            BookingUpdatedEvent::class => [
+                BookingUpdatedListener::class,
+            ],
+            BookingDeletedEvent::class => [
+                BookingDeletedListener::class,
+            ],
+        ];
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

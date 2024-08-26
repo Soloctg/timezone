@@ -9,6 +9,9 @@
 
 use App\Models\ScheduledNotification;
 use App\Notifications\BookingReminder1H;
+use App\Notifications\BookingReminder2H;
+use App\Notifications\BookingReminder5Min;
+use App\Notifications\BookingStartedNotification;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -51,6 +54,15 @@ class ProcessNotificationJob implements ShouldQueue
             switch ($this->notification->notification_class) {
                 case BookingReminder1H::class:
                     $this->notification->user->notify(new BookingReminder1H($this->notification->notifiable));
+                    break;
+                case BookingReminder2H::class:
+                    $this->notification->user->notify(new BookingReminder2H($this->notification->notifiable));
+                    break;
+                case BookingReminder5MIN::class:
+                    $this->notification->user->notify(new BookingReminder5MIN($this->notification->notifiable));
+                    break;
+                case BookingStartedNotification::class:
+                    $this->notification->user->notify(new BookingStartedNotification($this->notification->notifiable));
                     break;
             }
 

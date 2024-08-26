@@ -7,6 +7,7 @@ use App\Http\Requests\StoreBookingRequest;
 use App\Http\Requests\UpdateBookingRequest;
 use App\Models\ScheduledNotification;
 use App\Notifications\BookingReminder1H;
+use App\Notifications\BookingReminder2H;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 
@@ -17,6 +18,7 @@ class BookingController extends Controller
      */
     public function index()
     {
+
         $bookings = Booking::query()
             ->with(['user'])
             ->get();
@@ -50,6 +52,21 @@ class BookingController extends Controller
 
         $startTime = CarbonImmutable::parse(toUserDateTime($booking->start, $booking->user), $booking->user->timezone);
 
+        // Schedule 2H reminder
+        $twoHoursTime = fromUserDateTime($startTime->subHours(2), $booking->user);
+        if (now('UTC')->lessThan($twoHoursTime)) {
+            $booking->user->scheduledNotifications()->create([
+                'notification_class' => BookingReminder2H::class,
+                'notifiable_id' => $booking->id,
+                'notifiable_type' => Booking::class,
+                'sent' => false,
+                'processing' => false,
+                'scheduled_at' => $twoHoursTime,
+                'sent_at' => null,
+                'tries' => 0,
+            ]);
+        }
+
         // Schedule 1H reminder
         $oneHourTime = fromUserDateTime($startTime->subHour(), $booking->user);
         if (now('UTC')->lessThan($oneHourTime)) {
@@ -60,6 +77,36 @@ class BookingController extends Controller
                 'sent' => false,
                 'processing' => false,
                 'scheduled_at' => $oneHourTime,
+                'sent_at' => null,
+                'tries' => 0,
+            ]);
+        }
+
+
+        // Schedule 5 min reminder
+        $fiveMinutesTime = fromUserDateTime($startTime->subMinutes(5), $booking->user);
+        if (now('UTC')->lessThan($fiveMinutesTime)) {
+            $booking->user->scheduledNotifications()->create([
+                'notification_class' => BookingReminder5MIN::class,
+                'notifiable_id' => $booking->id,
+                'notifiable_type' => Booking::class,
+                'sent' => false,
+                'processing' => false,
+                'scheduled_at' => $fiveMinutesTime,
+                'sent_at' => null,
+                'tries' => 0,
+            ]);
+        }
+        // Schedule started reminder
+        $startingTime = fromUserDateTime($startTime, $booking->user);
+        if (now('UTC')->lessThan($startingTime)) {
+            $booking->user->scheduledNotifications()->create([
+                'notification_class' => BookingStartedNotification::class,
+                'notifiable_id' => $booking->id,
+                'notifiable_type' => Booking::class,
+                'sent' => false,
+                'processing' => false,
+                'scheduled_at' => $startingTime,
                 'sent_at' => null,
                 'tries' => 0,
             ]);
@@ -89,7 +136,7 @@ class BookingController extends Controller
      */
     public function update(UpdateBookingRequest $request, Booking $booking): RedirectResponse
     {
-        //$booking->update($request->validated());
+        $booking->update($request->validated());
 
         $booking->update([
             //'start' => $request->validated('start'),
@@ -114,6 +161,24 @@ class BookingController extends Controller
                 ->delete();
         }
 
+
+        // Since we are clearing the scheduled notifications, we need to create them again for the new date
+
+        // Schedule 2H reminder
+        $twoHoursTime = fromUserDateTime($startTime->subHours(2), $booking->user);
+        if (now('UTC')->lessThan($twoHoursTime)) {
+            $booking->user->scheduledNotifications()->create([
+                'notification_class' => BookingReminder2H::class,
+                'notifiable_id' => $booking->id,
+                'notifiable_type' => Booking::class,
+                'sent' => false,
+                'processing' => false,
+                'scheduled_at' => $twoHoursTime,
+                'sent_at' => null,
+                'tries' => 0,
+            ]);
+        }
+
         // Since we are clearing the scheduled notifications, we need to create them again for the new date
         // Schedule 1H reminder
         $oneHourTime = fromUserDateTime($startTime->subHour(), $booking->user);
@@ -130,19 +195,49 @@ class BookingController extends Controller
             ]);
         }
 
+        // Schedule 5 min reminder
+        $fiveMinutesTime = fromUserDateTime($startTime->subMinutes(5), $booking->user);
+        if (now('UTC')->lessThan($fiveMinutesTime)) {
+            $booking->user->scheduledNotifications()->create([
+                'notification_class' => BookingReminder5MIN::class,
+                'notifiable_id' => $booking->id,
+                'notifiable_type' => Booking::class,
+                'sent' => false,
+                'processing' => false,
+                'scheduled_at' => $fiveMinutesTime,
+                'sent_at' => null,
+                'tries' => 0,
+            ]);
+        }
+        // Schedule started reminder
+        $startingTime = fromUserDateTime($startTime, $booking->user);
+        if (now('UTC')->lessThan($startingTime)) {
+            $booking->user->scheduledNotifications()->create([
+                'notification_class' => BookingStartedNotification::class,
+                'notifiable_id' => $booking->id,
+                'notifiable_type' => Booking::class,
+                'sent' => false,
+                'processing' => false,
+                'scheduled_at' => $startingTime,
+                'sent_at' => null,
+                'tries' => 0,
+            ]);
+        }
+
         return redirect()->route('booking.index');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Booking $booking): RedirectResponse
+    public function destroy(Request $request, Booking $booking): RedirectResponse
     {
         abort_unless($booking->user_id === $request->user()->id, 404);
 
         $booking->delete();
 
         $booking->scheduledNotifications()
+            ->where('user_id', $booking->user_id)
             ->where('user_id', $booking->user_id)
             ->delete();
 

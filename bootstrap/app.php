@@ -19,21 +19,22 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'setTimezone' => \App\Http\Middleware\SetTimezoneMiddleware::class,
-            $schedule->command('send:scheduled-notifications')->everyMinute(),
+            //$schedule->command('send:scheduled-notifications')->everyMinute(),
         ]);
 
-        protected $listen = [
+    protected $listen = [
+
+        BookingCreatedEvent::class => [
+            BookingCreatedListener::class,
+        ],
+        BookingUpdatedEvent::class => [
+            BookingUpdatedListener::class,
+        ],
+        BookingDeletedEvent::class => [
+            BookingDeletedListener::class,
+        ],
+    ];
         
-            BookingCreatedEvent::class => [
-                BookingCreatedListener::class,
-            ],
-            BookingUpdatedEvent::class => [
-                BookingUpdatedListener::class,
-            ],
-            BookingDeletedEvent::class => [
-                BookingDeletedListener::class,
-            ],
-        ];
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

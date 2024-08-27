@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Http;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SnoozeNotifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -30,6 +30,12 @@ class User extends Authenticatable
         return $this->hasMany(ScheduledNotification::class);
     }
 
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class);
+    }
+
+    
     //automatic time zone
     public static function guessUserTimezoneUsingAPI($ip)
     {

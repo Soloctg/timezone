@@ -22,19 +22,8 @@ return Application::configure(basePath: dirname(__DIR__))
             //$schedule->command('send:scheduled-notifications')->everyMinute(),
         ]);
 
-    protected $listen = [
+    
 
-        BookingCreatedEvent::class => [
-            BookingCreatedListener::class,
-        ],
-        BookingUpdatedEvent::class => [
-            BookingUpdatedListener::class,
-        ],
-        BookingDeletedEvent::class => [
-            BookingDeletedListener::class,
-        ],
-    ];
-        
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
